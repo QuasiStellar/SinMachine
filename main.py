@@ -1,27 +1,61 @@
 DEBUG = False
 MAP = "⬛⬛⬛⬛⬛" \
+      "⬛⬜▧⬜⬛" \
+      "⬛▧▧◐⬛" \
       "⬛⬜⬜⬜⬛" \
-      "⬛▧⬜◐⬛" \
-      "⬛⬜⬜⬜⬛" \
+      "⬛⬜⬜⯇⬛" \
+      "⬛⬜⬜◐⬛" \
       "⬛⬛⬛⬛⬛"
 MAP = list(MAP)
 WIDTH = 5
 HEIGHT = len(MAP) // WIDTH
 POS_X = 1
 POS_Y = 1
-TURN_LIMIT = 3
+TURN_LIMIT = 12
 V_CELL = False
 V_CELL_X = 3
 V_CELL_Y = 2
 GEN_COUNT = MAP.count('◐')
 
 
+def update_lasers(scheme):
+    lasers = [0 for i in range(len(MAP))]
+    for i in range(len(MAP)):
+        if scheme[i] == '⯈':
+            for j in range(1, WIDTH):
+                if scheme[i + j] in ['⬜']:
+                    lasers[i + j] = 1
+                else:
+                    break
+        elif scheme[i] == '⯇':
+            for j in range(1, WIDTH):
+                if scheme[i - j] in ['⬜']:
+                    lasers[i - j] = 1
+                else:
+                    break
+        elif scheme[i] == '⯆':
+            for j in range(1, HEIGHT):
+                if scheme[i + j * WIDTH] in ['⬜']:
+                    lasers[i + j * WIDTH] = 1
+                else:
+                    break
+        elif scheme[i] == '⯅':
+            for j in range(1, HEIGHT):
+                if scheme[i - j * WIDTH] in ['⬜']:
+                    lasers[i - j * WIDTH] = 1
+                else:
+                    break
+    return lasers
+
+
 conditions = []
 
 
 class Condition:
-    def __init__(self, scheme, pos_x, pos_y, turn, route, gen_count, done):
+    def __init__(self, scheme, lasers, pos_x, pos_y, turn, route, gen_count, done):
         self.scheme = scheme
+        self.lasers = lasers
+        print(lasers)
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.turn = turn
@@ -52,7 +86,9 @@ class Condition:
                 return [(direction, 2)]
             elif self.scheme[(self.pos_y + direction[1]) * WIDTH + self.pos_x + direction[0]] == '⬜' and \
                     (len(self.route) == 0 or not (self.route[-1][1] == 0 and
-                         (direction[0] + self.route[-1][0][0] == 0 and direction[1] + self.route[-1][0][1] == 0))):
+                                                    (direction[0] + self.route[-1][0][0] == 0 and
+                                                     direction[1] + self.route[-1][0][1] == 0))) and \
+                    not self.lasers[(self.pos_y + direction[1]) * WIDTH + self.pos_x + direction[0]]:
                 neighbours.append((direction, 0))
             elif self.scheme[(self.pos_y + direction[1]) * WIDTH + self.pos_x + direction[0]] == '▧' and \
                     self.scheme[(self.pos_y + 2 * direction[1]) * WIDTH + self.pos_x + 2 * direction[0]] == '⬜':
@@ -62,13 +98,17 @@ class Condition:
     def generate_new(self):
         for neighbour in self.neighbours():
             new_scheme = self.scheme.copy()
+            new_lasers = self.lasers.copy()
             if neighbour[1] == 1:
                 new_scheme[(self.pos_y + neighbour[0][1]) * WIDTH + self.pos_x + neighbour[0][0]] = '⬜'
                 new_scheme[(self.pos_y + 2 * neighbour[0][1]) * WIDTH + self.pos_x + 2 * neighbour[0][0]] = '▧'
+                new_lasers = update_lasers(new_scheme)
             elif neighbour[1] == 2:
                 new_scheme[(self.pos_y + neighbour[0][1]) * WIDTH + self.pos_x + neighbour[0][0]] = '◑'
+                new_lasers = update_lasers(new_scheme)
                 self.gen_count -= 1
             conditions.append(Condition(new_scheme,
+                                        new_lasers,
                                         self.pos_x + (neighbour[0][0] if not neighbour[1] else 0),
                                         self.pos_y + (neighbour[0][1] if not neighbour[1] else 0),
                                         self.turn + 1,
@@ -77,7 +117,7 @@ class Condition:
                                         False))
 
 
-conditions.append(Condition(list(MAP), POS_X, POS_Y, 0, [], GEN_COUNT, False))
+conditions.append(Condition(MAP, update_lasers(MAP), POS_X, POS_Y, 0, [], GEN_COUNT, False))
 fastest = TURN_LIMIT + 1
 solutions = []
 for condition in conditions:
@@ -88,7 +128,7 @@ for condition in conditions:
         solutions = [condition]
     elif condition.done and condition.turn == fastest:
         solutions.append(condition)
-print("Checked", len(conditions), "possible condition..." if len(conditions) == 1 else "possible conditions....")
+print("Checked", len(conditions), "possible condition..." if len(conditions) == 1 else "possible conditions...")
 print("Found", len(solutions), "solution." if len(solutions) == 1 else "solutions.")
 for solution in solutions:
     print(solution.turn, solution.route)
