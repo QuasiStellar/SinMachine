@@ -27,6 +27,8 @@ class Condition:
             self.done = True
         elif self.turn > TURN_LIMIT:
             pass
+        elif abs(self.pos_x - V_CELL_X) + abs(self.pos_y - V_CELL_Y) > TURN_LIMIT - self.turn:
+            pass
         else:
             self.generate_new()
 
