@@ -1,7 +1,8 @@
-MAP = "█████" \
-      "█ ■ █" \
-      "█■  █" \
-      "█████"
+MAP = "⬛⬛⬛⬛⬛" \
+      "⬛⬜▧⬜⬛" \
+      "⬛▧⬜⬜⬛" \
+      "⬛⬛⬛⬛⬛"
+MAP = list(MAP)
 WIDTH = 5
 HEIGHT = len(MAP) // WIDTH
 POS_X = 1
@@ -10,6 +11,7 @@ TURN_LIMIT = 4
 V_CELL = True
 V_CELL_X = 3
 V_CELL_Y = 2
+GEN_COUNT = MAP.count('◐')
 
 
 conditions = []
@@ -41,20 +43,20 @@ class Condition:
         """
         neighbours = []
         for direction in ((-1, 0), (0, -1), (1, 0), (0, 1)):
-            if self.scheme[(self.pos_y + direction[1]) * WIDTH + self.pos_x + direction[0]] == ' ' and \
+            if self.scheme[(self.pos_y + direction[1]) * WIDTH + self.pos_x + direction[0]] == '⬜' and \
                     not (self.route[-1][1] == 0 and
                          (direction[0] + self.route[-1][0][0] == 0 and direction[1] + self.route[-1][0][1] == 0)):
                 neighbours.append((direction, 0))
-            elif self.scheme[(self.pos_y + direction[1]) * WIDTH + self.pos_x + direction[0]] == '■' and \
-                    self.scheme[(self.pos_y + 2 * direction[1]) * WIDTH + self.pos_x + 2 * direction[0]] == ' ':
+            elif self.scheme[(self.pos_y + direction[1]) * WIDTH + self.pos_x + direction[0]] == '▧' and \
+                    self.scheme[(self.pos_y + 2 * direction[1]) * WIDTH + self.pos_x + 2 * direction[0]] == '⬜':
                 neighbours.append((direction, 1))
         return neighbours
 
     def generate_new(self):
         for neighbour in self.neighbours():
             if neighbour[1] == 1:
-                self.scheme[(self.pos_y + neighbour[0][1]) * WIDTH + self.pos_x + neighbour[0][0]] = ' '
-                self.scheme[(self.pos_y + 2 * neighbour[0][1]) * WIDTH + self.pos_x + 2 * neighbour[0][0]] = '■'
+                self.scheme[(self.pos_y + neighbour[0][1]) * WIDTH + self.pos_x + neighbour[0][0]] = '⬜'
+                self.scheme[(self.pos_y + 2 * neighbour[0][1]) * WIDTH + self.pos_x + 2 * neighbour[0][0]] = '▧'
             conditions.append(Condition(self.scheme,
                                         self.pos_x + (neighbour[0][0] if not neighbour[1] else 0),
                                         self.pos_y + (neighbour[0][1] if not neighbour[1] else 0),
