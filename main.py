@@ -1,6 +1,6 @@
 DEBUG = False
 MAP = "⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛" \
-      "⬛⬛⬛⯆⯆⬜◐⯆▧⬛⬛" \
+      "⬛⬛⬛⯆⯆⬛◐⯆▧⬛⬛" \
       "⬛⬛◐⬜⯈⬜⬜⬜▧⬛⬛" \
       "⬛⬜▧⬜⬜⬜⬜⬜▧⬜⬛" \
       "⬛⬜⬜⬜⬜⬜▧⬜▧⬜⬛" \
@@ -24,6 +24,7 @@ V_CELL = False
 V_CELL_X = 3
 V_CELL_Y = 2
 GEN_COUNT = MAP.count('◐')
+TURN_LIMIT -= GEN_COUNT
 
 
 def update_lasers(scheme):
@@ -131,6 +132,7 @@ class Condition:
                 new_scheme[(self.pos_y + neighbour[0][1]) * WIDTH + self.pos_x + neighbour[0][0]] = '◑'
                 new_lasers = update_lasers(new_scheme)
                 self.gen_count -= 1
+                self.turn -= 1
             condition_hash = hash((tuple(new_scheme), new_pos_x, new_pos_y))
             if condition_hash in condition_set and condition_set[condition_hash] >= self.turn or \
                     condition_hash not in condition_set:
