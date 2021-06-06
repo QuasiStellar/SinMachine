@@ -1,17 +1,25 @@
 DEBUG = False
-MAP = "⬛⬛⬛⬛⬛" \
-      "⬛⬜▧⬜⬛" \
-      "⬛▧▧◐⬛" \
-      "⬛⬜⬜⬜⬛" \
-      "⬛⬜⬜⯇⬛" \
-      "⬛⬜⬜◐⬛" \
-      "⬛⬛⬛⬛⬛"
+MAP = "⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛" \
+      "⬛⬛⬛⯆⯆⬜◐⯆▧⬛⬛" \
+      "⬛⬛◐⬜⯈⬜⬜⬜▧⬛⬛" \
+      "⬛⬜▧⬜⬜⬜⬜⬜▧⬜⬛" \
+      "⬛⬜⬜⬜⬜⬜▧⬜▧⬜⬛" \
+      "⬛⬛⬛⬜⬜⬜⬜⬜▧⬜⬛" \
+      "⬛⬛⬛⬛⬛⬛⬛⬜⬜⬜⬛" \
+      "⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛"
+# MAP = "⬛⬛⬛⬛⬛⬛⬛" \
+#       "⬛⬜⬜⬜⬜⬜⬛" \
+#       "⬛⬜⬜▧⬜⬜⬛" \
+#       "⬛⬜⬜⬜⬜⬜⬛" \
+#       "⬛⯈⬜⬜⬜⬜⬛" \
+#       "⬛◐⬜⬜⬜⬜⬛" \
+#       "⬛⬛⬛⬛⬛⬛⬛"
 MAP = list(MAP)
-WIDTH = 5
+WIDTH = 11
 HEIGHT = len(MAP) // WIDTH
-POS_X = 1
-POS_Y = 1
-TURN_LIMIT = 12
+POS_X = 8
+POS_Y = 6
+TURN_LIMIT = 26
 V_CELL = False
 V_CELL_X = 3
 V_CELL_Y = 2
@@ -19,29 +27,29 @@ GEN_COUNT = MAP.count('◐')
 
 
 def update_lasers(scheme):
-    lasers = [0 for i in range(len(MAP))]
+    lasers = [0 for _ in range(len(MAP))]
     for i in range(len(MAP)):
         if scheme[i] == '⯈':
             for j in range(1, WIDTH):
-                if scheme[i + j] in ['⬜']:
+                if scheme[i + j] in ['⬜', '⯈', '⯇', '⯆', '⯅']:
                     lasers[i + j] = 1
                 else:
                     break
         elif scheme[i] == '⯇':
             for j in range(1, WIDTH):
-                if scheme[i - j] in ['⬜']:
+                if scheme[i - j] in ['⬜', '⯈', '⯇', '⯆', '⯅']:
                     lasers[i - j] = 1
                 else:
                     break
         elif scheme[i] == '⯆':
             for j in range(1, HEIGHT):
-                if scheme[i + j * WIDTH] in ['⬜']:
+                if scheme[i + j * WIDTH] in ['⬜', '⯈', '⯇', '⯆', '⯅']:
                     lasers[i + j * WIDTH] = 1
                 else:
                     break
         elif scheme[i] == '⯅':
             for j in range(1, HEIGHT):
-                if scheme[i - j * WIDTH] in ['⬜']:
+                if scheme[i - j * WIDTH] in ['⬜', '⯈', '⯇', '⯆', '⯅']:
                     lasers[i - j * WIDTH] = 1
                 else:
                     break
@@ -49,16 +57,30 @@ def update_lasers(scheme):
 
 
 conditions = []
+condition_set = {}
+
+
+# class Hashable:
+#     def __init__(self, scheme, pos_x, pos_y):
+#         self.scheme = scheme
+#         self.pos_x = pos_x
+#         self.pos_y = pos_y
+#
+#     def __eq__(self, other):
+#         return self.scheme == other.scheme and self.pos_x == other.pos_x and self.pos_y == other.pos_y
+#
+#     def __hash__(self):
+#         return hash((self.age, self.name))
 
 
 class Condition:
     def __init__(self, scheme, lasers, pos_x, pos_y, turn, route, gen_count, done):
         self.scheme = scheme
         self.lasers = lasers
-        print(lasers)
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.turn = turn
+        # print(turn)
         self.route = route
         self.gen_count = gen_count
         self.done = done
@@ -86,8 +108,8 @@ class Condition:
                 return [(direction, 2)]
             elif self.scheme[(self.pos_y + direction[1]) * WIDTH + self.pos_x + direction[0]] == '⬜' and \
                     (len(self.route) == 0 or not (self.route[-1][1] == 0 and
-                                                    (direction[0] + self.route[-1][0][0] == 0 and
-                                                     direction[1] + self.route[-1][0][1] == 0))) and \
+                                                  (direction[0] + self.route[-1][0][0] == 0 and
+                                                   direction[1] + self.route[-1][0][1] == 0))) and \
                     not self.lasers[(self.pos_y + direction[1]) * WIDTH + self.pos_x + direction[0]]:
                 neighbours.append((direction, 0))
             elif self.scheme[(self.pos_y + direction[1]) * WIDTH + self.pos_x + direction[0]] == '▧' and \
@@ -99,6 +121,8 @@ class Condition:
         for neighbour in self.neighbours():
             new_scheme = self.scheme.copy()
             new_lasers = self.lasers.copy()
+            new_pos_x = self.pos_x + (neighbour[0][0] if not neighbour[1] else 0)
+            new_pos_y = self.pos_y + (neighbour[0][1] if not neighbour[1] else 0)
             if neighbour[1] == 1:
                 new_scheme[(self.pos_y + neighbour[0][1]) * WIDTH + self.pos_x + neighbour[0][0]] = '⬜'
                 new_scheme[(self.pos_y + 2 * neighbour[0][1]) * WIDTH + self.pos_x + 2 * neighbour[0][0]] = '▧'
@@ -107,14 +131,18 @@ class Condition:
                 new_scheme[(self.pos_y + neighbour[0][1]) * WIDTH + self.pos_x + neighbour[0][0]] = '◑'
                 new_lasers = update_lasers(new_scheme)
                 self.gen_count -= 1
-            conditions.append(Condition(new_scheme,
-                                        new_lasers,
-                                        self.pos_x + (neighbour[0][0] if not neighbour[1] else 0),
-                                        self.pos_y + (neighbour[0][1] if not neighbour[1] else 0),
-                                        self.turn + 1,
-                                        self.route + [neighbour],
-                                        self.gen_count,
-                                        False))
+            condition_hash = hash((tuple(new_scheme), new_pos_x, new_pos_y))
+            if condition_hash in condition_set and condition_set[condition_hash] >= self.turn or \
+                    condition_hash not in condition_set:
+                condition_set[condition_hash] = self.turn
+                conditions.append(Condition(new_scheme,
+                                            new_lasers,
+                                            new_pos_x,
+                                            new_pos_y,
+                                            self.turn + 1,
+                                            self.route + [neighbour],
+                                            self.gen_count,
+                                            False))
 
 
 conditions.append(Condition(MAP, update_lasers(MAP), POS_X, POS_Y, 0, [], GEN_COUNT, False))
