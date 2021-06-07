@@ -61,19 +61,6 @@ conditions = []
 condition_set = {}
 
 
-# class Hashable:
-#     def __init__(self, scheme, pos_x, pos_y):
-#         self.scheme = scheme
-#         self.pos_x = pos_x
-#         self.pos_y = pos_y
-#
-#     def __eq__(self, other):
-#         return self.scheme == other.scheme and self.pos_x == other.pos_x and self.pos_y == other.pos_y
-#
-#     def __hash__(self):
-#         return hash((self.age, self.name))
-
-
 class Condition:
     def __init__(self, scheme, lasers, pos_x, pos_y, turn, route, gen_count, done):
         self.scheme = scheme
