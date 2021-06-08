@@ -1,25 +1,25 @@
 DEBUG = False
-MAP = "⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛" \
-      "⬛⬛⬛⯆⯆⬛◐⯆▧⬛⬛" \
-      "⬛⬛◐⬜⯈⬜⬜⬜▧⬛⬛" \
-      "⬛⬜▧⬜⬜⬜⬜⬜▧⬜⬛" \
-      "⬛⬜⬜⬜⬜⬜▧⬜▧⬜⬛" \
-      "⬛⬛⬛⬜⬜⬜⬜⬜▧⬜⬛" \
-      "⬛⬛⬛⬛⬛⬛⬛⬜⬜⬜⬛" \
-      "⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛"
-# MAP = "⬛⬛⬛⬛⬛⬛⬛" \
-#       "⬛⬜⬜⬜⬜⬜⬛" \
-#       "⬛⬜⬜▧⬜⬜⬛" \
-#       "⬛⬜⬜⬜⬜⬜⬛" \
-#       "⬛⯈⬜⬜⬜⬜⬛" \
-#       "⬛◐⬜⬜⬜⬜⬛" \
-#       "⬛⬛⬛⬛⬛⬛⬛"
+# MAP = "⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛" \
+#       "⬛⬛⬛⯆⯆⬛◐⯆▧⬛⬛" \
+#       "⬛⬛◐⬜⯈⬜⬜⬜▧⬛⬛" \
+#       "⬛⬜▧⬜⬜⬜⬜⬜▧⬜⬛" \
+#       "⬛⬜⬜⬜⬜⬜▧⬜▧⬜⬛" \
+#       "⬛⬛⬛⬜⬜⬜⬜⬜▧⬜⬛" \
+#       "⬛⬛⬛⬛⬛⬛⬛⬜⬜⬜⬛" \
+#       "⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛"
+MAP = "⬛⬛⬛⬛⬛⬛⬛" \
+      "⬛⬜⬜⬜⬜⬜⬛" \
+      "⬛⬜⬜▧⬜⬜⬛" \
+      "⬛⬜⬜⬜⬜⬜⬛" \
+      "⬛⯈⬜⬜⬜⬜⬛" \
+      "⬛◐⬜⬜⬜⬜⬛" \
+      "⬛⬛⬛⬛⬛⬛⬛"
 MAP = list(MAP)
-WIDTH = 11
+WIDTH = 7
 HEIGHT = len(MAP) // WIDTH
-POS_X = 8
-POS_Y = 6
-TURN_LIMIT = 26
+POS_X = 1
+POS_Y = 1
+TURN_LIMIT = 12
 V_CELL = False
 V_CELL_X = 3
 V_CELL_Y = 2
@@ -68,7 +68,6 @@ class Condition:
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.turn = turn
-        # print(turn)
         self.route = route
         self.gen_count = gen_count
         self.done = done
@@ -76,7 +75,7 @@ class Condition:
             self.done = True
         if not V_CELL and gen_count == 0:
             self.done = True
-        elif self.turn >= TURN_LIMIT:
+        elif self.turn > TURN_LIMIT:
             pass
         elif V_CELL and abs(self.pos_x - V_CELL_X) + abs(self.pos_y - V_CELL_Y) > TURN_LIMIT - self.turn:
             pass
@@ -147,5 +146,6 @@ for condition in conditions:
         solutions.append(condition)
 print("Checked", len(conditions), "possible condition..." if len(conditions) == 1 else "possible conditions...")
 print("Found", len(solutions), "solution." if len(solutions) == 1 else "solutions.")
+directions = {(1, 0): '🠖', (-1, 0): '🠔', (0, 1): '🠗', (0, -1): '🠕'}
 for solution in solutions:
-    print(solution.turn, solution.route)
+    print(*[directions[move[0]] for move in solution.route])
