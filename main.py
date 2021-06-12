@@ -91,15 +91,15 @@ class Condition:
         """
         neighbours = []
         for direction in ((-1, 0), (0, -1), (1, 0), (0, 1)):
-            if self.scheme[(self.pos_y + direction[1]) * WIDTH + self.pos_x + direction[0]] == '◐':
+            next_cell = self.scheme[(self.pos_y + direction[1]) * WIDTH + self.pos_x + direction[0]]
+            if next_cell == '◐':
                 return [(direction, 2)]
-            elif self.scheme[(self.pos_y + direction[1]) * WIDTH + self.pos_x + direction[0]] == '⬜' and \
-                    (len(self.route) == 0 or not (self.route[-1][1] == 0 and
-                                                  (direction[0] + self.route[-1][0][0] == 0 and
-                                                   direction[1] + self.route[-1][0][1] == 0))) and \
+            elif next_cell == '⬜' and (len(self.route) == 0 or not (self.route[-1][1] == 0 and
+                                                                    (direction[0] + self.route[-1][0][0] == 0 and
+                                                                     direction[1] + self.route[-1][0][1] == 0))) and \
                     not self.lasers[(self.pos_y + direction[1]) * WIDTH + self.pos_x + direction[0]]:
                 neighbours.append((direction, 0))
-            elif self.scheme[(self.pos_y + direction[1]) * WIDTH + self.pos_x + direction[0]] == '▧' and \
+            elif next_cell == '▧' and \
                     self.scheme[(self.pos_y + 2 * direction[1]) * WIDTH + self.pos_x + 2 * direction[0]] == '⬜':
                 neighbours.append((direction, 1))
         return neighbours
